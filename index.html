@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.433">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Diferencia salarial</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="index_files/libs/clipboard/clipboard.min.js"></script>
+<script src="index_files/libs/quarto-html/quarto.js"></script>
+<script src="index_files/libs/quarto-html/popper.min.js"></script>
+<script src="index_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="index_files/libs/quarto-html/anchor.min.js"></script>
+<link href="index_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="index_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="index_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="index_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="index_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Diferencia salarial</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<section id="diferencia-salarial-entre-géneros" class="level3">
+<h3 class="anchored" data-anchor-id="diferencia-salarial-entre-géneros">Diferencia salarial entre géneros</h3>
+<p>Por una conversación que tuve hace tiempo, me quedó dando vuelta un aspecto particular respecto a la brecha salarial. Se sabe que en Chile y la mayoría de los países del mundo existe una brecha; los hombres, por ser hombres, ganan más que las mujeres. Me comentaron igual que, mirando mirando los sueldos por rol/nivel/posición en verdad no hay discriminación o la brecha se reduce. Si se mira en detalle los sueldos por género para cargos específicos la brecha no existe, pero si vemos la diferencia global efectivamente se aprecia una brecha significativa ¿La discrimnación existe o no entonces?</p>
+<p>Aquí aparece un tema clásico respecto a análisis de datos, las variables control, análisis causal y la <a href="https://es.wikipedia.org/wiki/Paradoja_de_Simpson">paradoja de Simpson</a>. Es de esos casos raros donde puede haber una droga que sea mala para los hombres, mala para las mujeres pero buena para las personas. En general estas conclusiones opuestas son resueltas teniendo definido el modelo causal, normalmente representados por grafos (Directed Acyclic Graphs o DAGs). Este tipo de modelos define las reglas necesarias para estimar los efectos de ciertas variables en otras, explicitando por qué variables se debe controlar y por cuales no.</p>
+<p>Para este ejemplo,inventaré unos datos y haré un par de reflexiones respecto al sentido que tiene, o no, mirar estadísticas desglosadas a distintos niveles. Para generar los datos, supondré que el sueldo que gana una persona depende de su cargo/rol/posición pero además es influenciado por su género de la siguiente manera</p>
+<div class="cell" data-execution_count="1">
+<div class="cell-output cell-output-display">
+<p><img src="index_files/figure-html/cell-2-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>Para este ejemplo, tenemos que el género afecta indirectamente al sueldo a través del tipo de cargos al que pueden acceder (razonable supuesto, creo yo) y además afecta el sueldo directamente. El grafo “real” por supuesto puede ser mucho más complejo, incluyendo temas de educación, variables no observables y otros. De todas formas es un par de supuestos razonables que me ayudan a generar datos que coincidan con este grafo, y que veamos que pasa cuando se controla, o no, por la variable del cargo. Las reglas usadas son:</p>
+<ul>
+<li>Misma cantidad de hombres y mujeres (1000)</li>
+<li>Hombres entran en igual proporción a cargos con sueldos altos y con sueldos bajos</li>
+<li>Mujeres entran en un 70% a cargos con sueldos bajos y en un 30% a cargos con sueldos altos</li>
+<li>Los sueldos tienen un error normal, +- algunas lucas</li>
+<li>Las mujeres tienen un mini bono ambos roles en cuanto a salario</li>
+</ul>
+<p>A quien le interese puede ver el código asociado en mi <a href="https://github.com/rrrventures/wage_gap">github</a>.</p>
+<p>Con los datos generados, vemos que la brecha global es de cerca de 100 lucas en promedio. Pero cuando hacemos el análisis por cargo, la brecha se revierte; las mujeres derechamente ganan más que los hombres tomando en cuenta el cargo.</p>
+<div class="cell" data-execution_count="4">
+<div class="cell-output cell-output-stdout">
+<pre><code>Gender
+Hombre    749.146391
+Mujer     663.617914
+Name: Wage, dtype: float64
+Gender  Role      
+Hombre  Cargo alto     999.512615
+        Cargo bajo     501.766643
+Mujer   Cargo alto    1012.555364
+        Cargo bajo     509.038119
+Name: Wage, dtype: float64</code></pre>
+</div>
+</div>
+<p>La razón: mirar la brecha por cargo equivale a anular el efecto que tiene el género sobre los cargos a los que acceden. Si el mayor efecto del género se encuentra en las oportunidades de acceso a educación o a ciertas carreras, y de esa manera influye en los cargos a los que pueden acceder, ver los datos así lo enmascara por completo. El grafo correspondiente a este análisis sería:</p>
+<div class="cell" data-execution_count="5">
+<div class="cell-output cell-output-display">
+<p><img src="index_files/figure-html/cell-6-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>Esto significa que TODO el efecto indirecto del género sobre el sueldo se anula, y por lo tanto no estamos viendo el efecto total real del género. Como tenemos el modelo completamente definido, podemos calcular el efecto directo e indirecto con un par de regresiones:</p>
+<div class="cell" data-execution_count="7">
+<div class="cell-output cell-output-stdout">
+<pre><code>Efecto directo (c'): 9.547404815361539
+Efecto indirecto (a*b): -95.29658939342197
+Efecto total (c): -85.52847767702515</code></pre>
+</div>
+</div>
+<p>Para estos datos de mentira, resulta que el efecto más importante es el indirecto, mientras que el directo es de hecho positivo. Por este tipo de posibles paradojas (que en verdad no lo son) es complejo decidir qué datos presentar, cuáles variables son buenos controles, y qué hechos estilizados merecen atención y cuáles no. Normalmente no se presenta un grafo con la declaración respecto al modelo que se tiene en mente y por lo tanto queda a criterio del lector si los datos resultan evidencia causal o no. Esto ocurre por ejemplo en el <a href="https://www.economia.gob.cl/wp-content/uploads/2023/03/original-cuarto-reporte-indicadores-genero-2022-digital.pdf">reporte de indicadores de género 2022</a> donde se muestra la brecha controlando por un montón de factores, entre ellos cargos:</p>
+<div class="cell" data-execution_count="8">
+<div class="cell-output cell-output-display" data-execution_count="8">
+<p><img src="index_files/figure-html/cell-9-output-1.jpeg" class="img-fluid"></p>
+</div>
+</div>
+<p>En este caso da lo mismo igual, las mujeres ganan menos mirándolo desde todos los ángulos. Viva Chile.</p>
+<p>También está el caso del banco central y su informe de <a href="https://www.bcentral.cl/documents/33528/133214/rcc-15032023.pdf/abba5a48-0186-0e8e-e4c9-f7e91cb2387a?t=1678899962437">Brechas de Género y Desempeño Macroeconómico</a> de este año, que justamente controla por una chorrera de variables y todas sus combinaciones para estimar el promedio de la brecha:</p>
+<div class="cell" data-execution_count="9">
+<div class="cell-output cell-output-display" data-execution_count="9">
+<p><img src="index_files/figure-html/cell-10-output-1.jpeg" class="img-fluid"></p>
+</div>
+</div>
+<div class="cell" data-execution_count="10">
+<div class="cell-output cell-output-display" data-execution_count="10">
+<p><img src="index_files/figure-html/cell-11-output-1.jpeg" class="img-fluid"></p>
+</div>
+</div>
+<p>Esto no está necesariamente mal pero tiene poco sentido si no está asociado al modelo causal que tienen en mente, como para poder evaluar la pertinencia de controlar o no por ciertas variables, bajo el supuesto que lo que se quiere estimar es el efecto del género a la diferencia salarial.</p>
+</section>
+<section id="conclusiones" class="level3">
+<h3 class="anchored" data-anchor-id="conclusiones">Conclusiones</h3>
+<p>La conclusión principal es que siempre hay que desconfiar de los datos (cuec, aló cadem). Presentarlos de una u otra forma puede ser una manera de dar vuelta hechos irrefutables, en algunos casos de manera maliciosa, o maquillarlos de manera inadvertida. Si no está presentado el grafo causal que representa el problema que se investiga es difícil evaluar los resultados. El grafo define las relaciones que las variables pueden tener y por lo tanto es testeable respecto a datos observados; define las dependencias/independencias de las variables y se pueden comprobar sin necesidad de experimentos. Hay, además, un problema bien grande de controlar por variables que uno no debería lo cuál genera relaciones espúreas que lleva a concluir cuestiones totalmente erradas. No es la idea de este blog, pero a quien le interese creo que <a href="https://www.amazon.com/-/es/Judea-Pearl/dp/1119186846">Causal Inference in Statistics, a Primer</a> es re bueno introductorio para quien ya sepa un poco de estadísticas, o pueden leer primero <a href="https://www.amazon.com/-/es/Judea-Pearl/dp/046509760X">A book of why</a> si les gustan más los libros de difusión. La última recomendación (y la única gratis) es el libro que está totalmente liberado en web <a href="https://theeffectbook.net/">The Effect</a></p>
+<p>TL;DR Básicamente teman cada vez que controlan, o no, por alguna variable.</p>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
