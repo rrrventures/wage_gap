@@ -33,6 +33,9 @@ ul.task-list li input[type="checkbox"] {
 <script src="index_files/libs/bootstrap/bootstrap.min.js"></script>
 <link href="index_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="index_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
 
 
 </head>
@@ -81,50 +84,111 @@ ul.task-list li input[type="checkbox"] {
 <p>A quien le interese puede ver el código asociado en mi <a href="https://github.com/rrrventures/wage_gap">github</a>.</p>
 <p>Con los datos generados, vemos que la brecha global es de cerca de 100 lucas en promedio. Pero cuando hacemos el análisis por cargo, la brecha se revierte; las mujeres derechamente ganan más que los hombres tomando en cuenta el cargo.</p>
 <div class="cell" data-execution_count="4">
-<div class="cell-output cell-output-stdout">
-<pre><code>Gender
-Hombre    749.146391
-Mujer     663.617914
-Name: Wage, dtype: float64
-Gender  Role      
-Hombre  Cargo alto     999.512615
-        Cargo bajo     501.766643
-Mujer   Cargo alto    1012.555364
-        Cargo bajo     509.038119
-Name: Wage, dtype: float64</code></pre>
+<div class="cell-output cell-output-display" data-execution_count="4">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">Género</th>
+<th data-quarto-table-cell-role="th">Sueldo</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>Hombre</td>
+<td>749.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>Mujer</td>
+<td>664.0</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<div class="cell" data-execution_count="5">
+<div class="cell-output cell-output-display" data-execution_count="5">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">Género</th>
+<th data-quarto-table-cell-role="th">Rol</th>
+<th data-quarto-table-cell-role="th">Sueldo</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>Hombre</td>
+<td>Cargo alto</td>
+<td>1000.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>Hombre</td>
+<td>Cargo bajo</td>
+<td>502.0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>Mujer</td>
+<td>Cargo alto</td>
+<td>1013.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>Mujer</td>
+<td>Cargo bajo</td>
+<td>509.0</td>
+</tr>
+</tbody>
+</table>
+
+</div>
 </div>
 </div>
 <p>La razón: mirar la brecha por cargo equivale a anular el efecto que tiene el género sobre los cargos a los que acceden. Si el mayor efecto del género se encuentra en las oportunidades de acceso a educación o a ciertas carreras, y de esa manera influye en los cargos a los que pueden acceder, ver los datos de esta manera lo enmascara por completo. El grafo correspondiente a este análisis, donde controlamos por el cargo sería:</p>
-<div class="cell" data-execution_count="11">
+<div class="cell" data-scrolled="true" data-execution_count="7">
 <div class="cell-output cell-output-display">
-<p><img src="index_files/figure-html/cell-6-output-1.png" class="img-fluid"></p>
+<p><img src="index_files/figure-html/cell-8-output-1.png" class="img-fluid"></p>
 </div>
 </div>
 <p>Esto significa que TODO el efecto indirecto del género sobre el sueldo se anula, y por lo tanto no estamos viendo el efecto total real del género en los sueldos finales. Como tenemos el modelo completamente definido, podemos calcular el efecto directo e indirecto con un par de regresiones:</p>
-<div class="cell" data-execution_count="7">
+<div class="cell" data-execution_count="9">
 <div class="cell-output cell-output-stdout">
 <pre><code>Efecto directo (c'): 9.547404815361539
 Efecto indirecto (a*b): -95.29658939342197
 Efecto total (c): -85.52847767702515</code></pre>
 </div>
 </div>
-<p>Obviamente como yo mismo generé los datos, hacer una estimación de los efectos no tiene demasiado sentido, pero sirve paraa mostrar que en un caso dondo solo tengo datos observados y un modelo representado con un grafo que coincide razonablemente con la realidad, esta estimación da un efecto causal confiable.</p>
+<p>Obviamente como yo mismo generé los datos, hacer una estimación de los efectos no tiene demasiado sentido, pero sirve para mostrar que en un caso dondo solo tengo datos observados y un modelo representado con un grafo que coincide razonablemente con la realidad, esta estimación da un efecto causal confiable.</p>
 <p>Para estos datos de mentira, resulta que el efecto más importante es el indirecto, mientras que el directo es de hecho positivo. Por este tipo de posibles paradojas (que en verdad no lo son) es complejo decidir qué datos presentar, cuáles variables son buenos controles, y qué hechos estilizados merecen atención y cuáles no. Normalmente no se presenta un grafo con la declaración respecto al modelo que se tiene en mente y por lo tanto queda a criterio del lector si los datos resultan evidencia causal o no, y depende de uno resolver posibles paradojas. Esto ocurre por ejemplo en el <a href="https://www.economia.gob.cl/wp-content/uploads/2023/03/original-cuarto-reporte-indicadores-genero-2022-digital.pdf">reporte de indicadores de género 2022</a> donde se muestra la brecha controlando por un montón de factores, entre ellos cargos:</p>
-<div class="cell" data-execution_count="8">
-<div class="cell-output cell-output-display" data-execution_count="8">
-<p><img src="index_files/figure-html/cell-9-output-1.jpeg" class="img-fluid"></p>
+<div class="cell" data-execution_count="10">
+<div class="cell-output cell-output-display" data-execution_count="10">
+<p><img src="index_files/figure-html/cell-11-output-1.jpeg" class="img-fluid"></p>
 </div>
 </div>
 <p>En este caso da lo mismo igual, las mujeres ganan menos mirándolo desde todos los ángulos. Viva Chile.</p>
 <p>También está el caso del banco central y su informe de <a href="https://www.bcentral.cl/documents/33528/133214/rcc-15032023.pdf/abba5a48-0186-0e8e-e4c9-f7e91cb2387a?t=1678899962437">Brechas de Género y Desempeño Macroeconómico</a> de este año, que justamente controla por una chorrera de variables y todas sus combinaciones para estimar el promedio de la brecha:</p>
-<div class="cell" data-execution_count="9">
-<div class="cell-output cell-output-display" data-execution_count="9">
-<p><img src="index_files/figure-html/cell-10-output-1.jpeg" class="img-fluid"></p>
+<div class="cell" data-execution_count="11">
+<div class="cell-output cell-output-display" data-execution_count="11">
+<p><img src="index_files/figure-html/cell-12-output-1.jpeg" class="img-fluid"></p>
 </div>
 </div>
-<div class="cell" data-execution_count="10">
-<div class="cell-output cell-output-display" data-execution_count="10">
-<p><img src="index_files/figure-html/cell-11-output-1.jpeg" class="img-fluid"></p>
+<div class="cell" data-execution_count="12">
+<div class="cell-output cell-output-display" data-execution_count="12">
+<p><img src="index_files/figure-html/cell-13-output-1.jpeg" class="img-fluid"></p>
 </div>
 </div>
 <p>Esto no está necesariamente mal pero tiene poco sentido si no concuerda con algún modelo causal declarado, como para poder evaluar la pertinencia de controlar o no por ciertas variables, bajo el supuesto que lo que se quiere estimar es el efecto del género a la diferencia salarial.</p>
